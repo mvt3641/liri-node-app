@@ -3,7 +3,7 @@ var keys = require('./keys');
 var Twitter = require('twitter');
 var spotify = require('node-spotify-api');
 var request = require('request');
-var fs      = require('fs');
+var fs = require('fs');
 
 //Imported Keys//
 var spotify = new spotify(keys.spotify);
@@ -36,6 +36,7 @@ if (process.argv[2] === "spotify-this-song") {
   if (!songName) {
     songName = 'The Sign Ace';
   }
+
   spotify.search({
     type: 'track',
     query: songName,
@@ -56,14 +57,19 @@ if (process.argv[2] === "spotify-this-song") {
         console.log('Song Preview URL:  Not Avalible')
       } else {
         console.log('Song Preview URL: ', data.tracks.items[i].preview_url);
+
+        console.log('Artist Name: ', data.tracks.items[i].album.artists[0].name);
+        //console.log(data.tracks.items[0].album);
+        console.log('\n')
       }
-      console.log('Artist Name: ', data.tracks.items[i].album.artists[0].name);
-      //console.log(data.tracks.items[0].album);
-      console.log('\n')
     }
 
-  })
-}
+
+  });
+
+
+
+};
 
 ////OMDB//////
 
@@ -93,14 +99,53 @@ if (process.argv[2] === "omdb") {
 
 ////////////Liri DWIS////////////////////////////
 
-if (process.argv[2] === "do-what-it-says") {
-      fs.readFile("random.txt", "UTF-8", function(error, data){
-          if (error){
-              console.log(error);
+if (process.argv[2] === "readtext") {
+  fs.readFile("random.txt", "UTF-8", function(error, data) {
+    if (error) {
+      console.log(error);
+    }
+    var songName = data;
+
+    function newFile() {
+      spotify.search({
+        type: 'track',
+        query: songName,
+        limit: 20
+      }, function(err, data) {
+        if (err) {
+          return console.log('Error occurred: ' + err);
+        }
+        //console.log(JSON.stringify(data, null, 2));
+
+        for (var i = 0; i < data.tracks.items.length; i++) {
+          //console.log(JSON.stringify(data[i]));
+          //var track = data.tracks.items[0];
+          console.log('Album name: ', data.tracks.items[i].album.name);
+          console.log('Song Name: ', data.tracks.items[i].name);
+
+          if (data.tracks.items[i].preview_url === null) {
+            console.log('Song Preview URL:  Not Avalible')
+          } else {
+            console.log('Song Preview URL: ', data.tracks.items[i].preview_url);
+
+            console.log('Artist Name: ', data.tracks.items[i].album.artists[0].name);
+            //console.log(data.tracks.items[0].album);
+            console.log('\n')
           }
-              console.log(data);
+        }
 
 
+      });
+
+    };
+    fs.appendFile('log.txt', data, function(err) {
+      if (err) throw err;
+      console.log('Saved!');
     });
+    console.log(data);
 
-  };
+
+  });
+
+
+};
